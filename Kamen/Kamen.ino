@@ -52,10 +52,10 @@ const int rtEncoder = 3;       // right encoder pin
 
 const int enableLED = 13;      // stepper enabled LED
 
-const int rtStepPin = 52;      // right stepper motor step pin
+const int rtStepPin = 46;      // right stepper motor step pin
 const int rtDirPin = 53;       // right stepper motor direction pin
-const int ltStepPin = 50;      // left stepper motor step pin
-const int ltDirPin = 51;       // left stepper motor direction pin
+const int ltStepPin = 44;      // left stepper motor step pin
+const int ltDirPin = 49;       // left stepper motor direction pin
 const int stepperEnable = 48;  // stepper enable pin on stepStick
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -91,7 +91,7 @@ const int stepperEnable = 48;  // stepper enable pin on stepStick
 #define robotwidth 8.3125                 // inches
 
 //define global variable
-volatile long ecount[2] = {0, 0};         // interrupt variable to hold number of encoder counts (left, right)
+volatile long ecount[2] = {0, 0};         // interrupt variable to hold number of encoder counts (eft, right)
 volatile int steps[2] = {0, 0};           // global variable to hold number of steps counts (left, right)
 volatile int stepecount[2] = {0, 0};      // global variable to hold number of step counts of each two encoder counts (left, right)
 volatile int speedreduction[2] = {0, 0};  // global variable for speed reduction
@@ -435,3 +435,5 @@ void moveSquare(){
   stopmoving();
   }
 }
+
+void randomWander
