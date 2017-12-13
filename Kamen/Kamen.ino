@@ -52,10 +52,10 @@ const int rtEncoder = 3;       // right encoder pin
 
 const int enableLED = 13;      // stepper enabled LED
 
-const int rtStepPin = 46;      // right stepper motor step pin
+const int rtStepPin = 52;      // right stepper motor step pin
 const int rtDirPin = 53;       // right stepper motor direction pin
-const int ltStepPin = 44;      // left stepper motor step pin
-const int ltDirPin = 49;       // left stepper motor direction pin
+const int ltStepPin = 50;      // left stepper motor step pin
+const int ltDirPin = 51;       // left stepper motor direction pin
 const int stepperEnable = 48;  // stepper enable pin on stepStick
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -91,7 +91,7 @@ const int stepperEnable = 48;  // stepper enable pin on stepStick
 #define robotwidth 8.3125                 // inches
 
 //define global variable
-volatile long ecount[2] = {0, 0};         // interrupt variable to hold number of encoder counts (eft, right)
+volatile long ecount[2] = {0, 0};         // interrupt variable to hold number of encoder counts (left, right)
 volatile int steps[2] = {0, 0};           // global variable to hold number of steps counts (left, right)
 volatile int stepecount[2] = {0, 0};      // global variable to hold number of step counts of each two encoder counts (left, right)
 volatile int speedreduction[2] = {0, 0};  // global variable for speed reduction
@@ -320,7 +320,7 @@ void forward(double distanceinfeet) {
   digitalWrite(ltDirPin, FWD);
   digitalWrite(rtDirPin, FWD);
   double distanceinin = distanceinfeet * 12;                              // unit convertion
-  int stepcount = (int) (distanceinin / wheelperimeter * one_rot + 0.5);
+  int stepcount = (int) (distanceinin / wheelcircumference * one_rot + 0.5);
   int desire_steps[2] = {stepcount, stepcount};
   movedifferentratio(1, 1, desire_steps);
 }
@@ -331,7 +331,7 @@ void reverse(double distanceinfeet) {
   digitalWrite(ltDirPin, REV);
   digitalWrite(rtDirPin, REV);
   double distanceinin = distanceinfeet * 12;                              // unit convertion
-  int stepcount = (int) (distanceinin / wheelperimeter * one_rot + 0.5);
+  int stepcount = (int) (distanceinin / wheelcircumference * one_rot + 0.5);
   int desire_steps[2] = {stepcount, stepcount};
   movedifferentratio(1, 1, desire_steps);
 }
@@ -352,7 +352,7 @@ void spin(int toward, int deg) {
   digitalWrite(ltDirPin, (toward == RIGHT ? FWD : REV));
   digitalWrite(rtDirPin, (toward == LEFT ? FWD : REV));
   double perimetertotravel = (robotwidth / 2 * PI * 2) * deg / 360 ;           // unit convertion
-  int stepcount = (int) (perimetertotravel / wheelperimeter * one_rot + 0.5);
+  int stepcount = (int) (perimetertotravel / wheelcircumference * one_rot + 0.5);
   int desire_steps[2] = {stepcount, stepcount};
   movedifferentratio(1, 1, desire_steps);
 }
@@ -362,7 +362,7 @@ void pivot(int toward, int deg) {
   digitalWrite(ltDirPin, FWD);
   digitalWrite(rtDirPin, FWD);
   double perimetertotravel = (robotwidth * PI * 2) * deg / 360 ;               // unit convertion
-  int stepcount = (int) (perimetertotravel / wheelperimeter * one_rot + 0.5);
+  int stepcount = (int) (perimetertotravel / wheelcircumference * one_rot + 0.5);
   int desire_steps[2] = {stepcount, stepcount};
   desire_steps[toward] = 0;
   movedifferentratio((toward == LEFT ? 0 : 1), (toward == RIGHT ? 0 : 1), desire_steps);
@@ -379,11 +379,11 @@ void turn(int toward, int deg, double radius) {
   double radiusin = radius * 12;
   if (radiusin > (robotwidth / 2)) {
     if (toward == LEFT) {
-      leftratio = ((radiusin - (robotwidth / 2)) * 2 * PI / wheelperimeter );
-      rightratio = ((radiusin + (robotwidth / 2)) * 2 * PI / wheelperimeter);
+      leftratio = ((radiusin - (robotwidth / 2)) * 2 * PI / wheelcircumference);
+      rightratio = ((radiusin + (robotwidth / 2)) * 2 * PI / wheelcircumference);
     } else {
-      rightratio = ((radiusin - (robotwidth / 2)) * 2 * PI / wheelperimeter);
-      leftratio = ((radiusin + (robotwidth / 2)) * 2 * PI / wheelperimeter);
+      rightratio = ((radiusin - (robotwidth / 2)) * 2 * PI / wheelcircumference);
+      leftratio = ((radiusin + (robotwidth / 2)) * 2 * PI / wheelcircumference);
     }
     leftsteps = (int) round(leftratio / 360 * deg * one_rot + 0.5);
     rightsteps = (int) round(rightratio / 360 * deg * one_rot + 0.5);
@@ -435,5 +435,15 @@ void moveSquare(){
   stopmoving();
   }
 }
-
-void randomWander
+//##################################################################################################################################################################################################
+// function to make the robot randomly wander
+void randomWander() {
+  while(true) {
+    int angle = (int) random(0, 360);
+    int dir = round(random(0, 1));
+    double distance = random(0, 3);
+    goToAngle(angle);
+    stopmoving();
+    
+  }
+}
