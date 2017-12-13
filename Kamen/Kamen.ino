@@ -52,10 +52,10 @@ const int rtEncoder = 3;       // right encoder pin
 
 const int enableLED = 13;      // stepper enabled LED
 
-const int rtStepPin = 52;      // right stepper motor step pin
+const int rtStepPin = 46;      // right stepper motor step pin
 const int rtDirPin = 53;       // right stepper motor direction pin
-const int ltStepPin = 50;      // left stepper motor step pin
-const int ltDirPin = 51;       // left stepper motor direction pin
+const int ltStepPin = 44;      // left stepper motor step pin
+const int ltDirPin = 49;       // left stepper motor direction pin
 const int stepperEnable = 48;  // stepper enable pin on stepStick
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -71,7 +71,7 @@ const int stepperEnable = 48;  // stepper enable pin on stepStick
 
 #define debounce_time 600                 // time to wait for botton debouncing
 #define start_time 1000                   // time to wait before programe start
-#define stop_time 500                     // delay between each main application
+#define stop_time 50                     // delay between each main application
 
 #define one_rot 800                       // number of counts for one wheel rotation
 #define one_ecount 80                     // number of counts for steps while two encoder count
@@ -160,21 +160,8 @@ void setup() {
   digitalWrite(enableLED, HIGH);                               // LED on pin 13 on for indication
   while (digitalRead(startbutton) == LOW);                     // wait till the botton is released
   delay(start_time);                                           // Delay before start
-  
-  moveSquare();
-  stopmoving();
-  movecircle(LEFT,2);
-  stopmoving();
-  movefigure8(2);
-  stopmoving();
-  goToGoal(1,2);
-  stopmoving();
-  goToGoal(-2, 1);
-  stopmoving();
-  goToAngle(-45);
-  stopmoving();
-  goToAngle(60);
-  stopmoving();
+
+  randomWander();
   
   digitalWrite(stepperEnable, HIGH);                           // turns on the stepper motor driver
 }
@@ -439,11 +426,12 @@ void moveSquare(){
 // function to make the robot randomly wander
 void randomWander() {
   while(true) {
-    int angle = (int) random(0, 360);
-    int dir = round(random(0, 1));
-    double distance = random(0, 3);
+    int angle = round(random(-45, 45));
+    double distance = random(0, 5);
+    distance = distance / 10 + 0.25;
     goToAngle(angle);
     stopmoving();
-    
+    forward(distance);
+    stopmoving();
   }
 }
