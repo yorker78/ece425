@@ -320,7 +320,7 @@ void forward(double distanceinfeet) {
   for (int i = 0; i < distanceinin; i++){
     digitalWrite(ltDirPin, FWD);
     digitalWrite(rtDirPin, FWD);
-    double chunkDistance = i + 1 > distanceinin ? 1 : distanceinin - i;
+    double chunkDistance = i + 1 < distanceinin ? 1 : distanceinin - i;
     int stepcount = (int) (chunkDistance / wheelcircumference * one_rot + 0.5);
     int desire_steps[2] = {stepcount, stepcount};
     movedifferentratio(1, 1, desire_steps);
