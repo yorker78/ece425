@@ -90,11 +90,23 @@ const int stepperEnable = 48;  // stepper enable pin on stepStick
 #define wheelwidth 3.4375                 // inches
 #define robotwidth 8.3125                 // inches
 
+#define irFront A0
+#define irRear A1
+#define irLeft A2
+#define irRight A3
+
 //define global variable
 volatile long ecount[2] = {0, 0};         // interrupt variable to hold number of encoder counts (left, right)
 volatile int steps[2] = {0, 0};           // global variable to hold number of steps counts (left, right)
 volatile int stepecount[2] = {0, 0};      // global variable to hold number of step counts of each two encoder counts (left, right)
 volatile int speedreduction[2] = {0, 0};  // global variable for speed reduction
+int irFrontAvg;                           // variable to hold average of current front IR reading
+int irLeftAvg;                            // variable to hold average of current left IR reading
+int irRearAvg;                            // variable to hold average of current rear IR reading
+int irRightAvg;                           // variable to hold average of current right IR reading
+double currentHeading = 0;                       // variable to hold the robot's current heading
+double currentXPosition = 0;                     // variable to hold the robot's x position
+double currentYPosition = 0;                     // variable to hold the robot's x position
 
 //#########################################################################################################################
 void setup() {
@@ -304,12 +316,16 @@ void movedifferentratio(int leftratio, int rightratio, int desire_step[]) {
 //##################################################################################################################################################################################################
 // function to let robot move forward
 void forward(double distanceinfeet) {
-  digitalWrite(ltDirPin, FWD);
-  digitalWrite(rtDirPin, FWD);
   double distanceinin = distanceinfeet * 12;                              // unit convertion
-  int stepcount = (int) (distanceinin / wheelcircumference * one_rot + 0.5);
-  int desire_steps[2] = {stepcount, stepcount};
-  movedifferentratio(1, 1, desire_steps);
+  for (int i = 0; i < distanceinin; i++){
+    digitalWrite(ltDirPin, FWD);
+    digitalWrite(rtDirPin, FWD);
+    double chunkDistance = i + 1 > distanceinin ? 1 : distanceinin - i;
+    int stepcount = (int) (chunkDistance / wheelcircumference * one_rot + 0.5);
+    int desire_steps[2] = {stepcount, stepcount};
+    movedifferentratio(1, 1, desire_steps);
+    updatePosition(chunkDistance);
+  }
 }
 
 //##################################################################################################################################################################################################
@@ -336,12 +352,16 @@ void stopmoving() {
 //##################################################################################################################################################################################################
 // function to let robot spin
 void spin(int toward, int deg) {
-  digitalWrite(ltDirPin, (toward == RIGHT ? FWD : REV));
-  digitalWrite(rtDirPin, (toward == LEFT ? FWD : REV));
-  double perimetertotravel = (robotwidth / 2 * PI * 2) * deg / 360 ;           // unit convertion
-  int stepcount = (int) (perimetertotravel / wheelcircumference * one_rot + 0.5);
-  int desire_steps[2] = {stepcount, stepcount};
-  movedifferentratio(1, 1, desire_steps);
+  for(int i = 0; i < deg; i+=5) {
+    digitalWrite(ltDirPin, (toward == RIGHT ? FWD : REV));
+    digitalWrite(rtDirPin, (toward == LEFT ? FWD : REV));
+    double perimetertotravel = (robotwidth / 2 * PI * 2) * deg / 360 ;      // unit convertion
+    double chunkDegrees = i + 5 > deg ? 5 : deg - i;
+    int stepcount = (int) (chunkDegrees / wheelcircumference * one_rot + 0.5);
+    int desire_steps[2] = {stepcount, stepcount};
+    movedifferentratio(1, 1, desire_steps);
+    updateHeading((toward == RIGHT ? 1 : -1) * chunkDegrees);
+  }
 }
 //##################################################################################################################################################################################################
 // function to let robot pivot
@@ -391,8 +411,8 @@ void movefigure8(double diameter){
 }
 //##################################################################################################################################################################################################
 // function to let robot turn to specific angle
-void goToAngle(int Angle) {
-  spin(Angle > 0 ? LEFT : RIGHT, abs(Angle));
+void goToAngle(int angle) {
+  spin(angle > 0 ? LEFT : RIGHT, abs(angle));
 }
 //##################################################################################################################################################################################################
 // function to let robot go to specific goal
@@ -417,9 +437,9 @@ void goToGoal(int x, int y) {
 void moveSquare(){
   for(int i = 0; i < 4; i++){
     forward(2);
-  stopmoving();
+    stopmoving();
     pivot(RIGHT, 90);
-  stopmoving();
+    stopmoving();
   }
 }
 //##################################################################################################################################################################################################
@@ -434,4 +454,23 @@ void randomWander() {
     forward(distance);
     stopmoving();
   }
+}
+//##################################################################################################################################################################################################
+// function to update the IR sensor
+void updateIR() {
+  irFrontAvg = analogRead(irFront);
+  irRearAvg = analogRead(irRear);
+  irLeftAvg = analogRead(irLeft);
+  irRightAvg = analogRead(irRight);
+}
+//##################################################################################################################################################################################################
+// function to update robot's heading
+void updateHeading(double headingAdjustment) {
+  currentHeading += headingAdjustment;
+}
+//##################################################################################################################################################################################################
+// function to update x and y positions of the robot
+void updatePosition(double distanceMoved){
+  currentXPosition += distanceMoved * sin(90 - currentHeading);
+  currentYPosition += distanceMoved * sin(currentHeading);
 }
