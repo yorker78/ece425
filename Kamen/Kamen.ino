@@ -355,9 +355,9 @@ void spin(int toward, int deg) {
   for(int i = 0; i < deg; i+=5) {
     digitalWrite(ltDirPin, (toward == RIGHT ? FWD : REV));
     digitalWrite(rtDirPin, (toward == LEFT ? FWD : REV));
-    double perimetertotravel = (robotwidth / 2 * PI * 2) * deg / 360 ;      // unit convertion
-    double chunkDegrees = i + 5 > deg ? 5 : deg - i;
-    int stepcount = (int) (chunkDegrees / wheelcircumference * one_rot + 0.5);
+    double chunkDegrees = i + 5 < deg ? 5 : deg - i;
+    double perimetertotravel = (robotwidth / 2 * PI * 2) * chunkDegrees / 360 ;  // unit convertion
+    int stepcount = (int) (perimetertotravel / wheelcircumference * one_rot + 0.5);
     int desire_steps[2] = {stepcount, stepcount};
     movedifferentratio(1, 1, desire_steps);
     updateHeading((toward == RIGHT ? 1 : -1) * chunkDegrees);
